@@ -29,7 +29,9 @@ class NameServer:
             await writer.drain()
 
     async def avvia(self):
-        pass
+        s = await asyncio.start_server(self.server, self.host, self.port)
+        async with s:
+            await s.serve_forever()
 
 
 class TimeServer:
