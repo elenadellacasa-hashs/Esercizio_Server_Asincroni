@@ -60,6 +60,21 @@ async def connessione_server(addr, port, server):
             risposta_json = json.loads(risposta.decode())
             if risposta_json["status"] == "ok":
                 print(f"Risposta ricevuta correttamente. risposta: {risposta_json}")
+        elif server == "echo":
+            print("Inserire il testo:")
+            text = await asyncio.to_thread(input)
+            richiesta_diz = {
+                "cmd": "echo",
+                "text":text
+            }
+            richiesta_json = json.dumps(richiesta_diz) + "\n"
+            writer.write(richiesta_json.encode())
+            await writer.drain()
+
+            risposta = await reader.readline()
+            risposta_json = json.loads(risposta.decode())
+            if risposta_json["status"] == "ok":
+                print(f"Risposta ricevuta correttamente. risposta: {risposta_json}")
     except KeyboardInterrupt:
         print("Interruzione da tastiera")
     except Exception as e:

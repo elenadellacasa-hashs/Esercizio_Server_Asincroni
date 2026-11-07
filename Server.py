@@ -91,10 +91,42 @@ class EchoServer:
         self.port = port
 
     async def server(self, reader, writer):
-        pass
+        try:
+            addr = writer.get_extra_info("peername")
+            print(f"Client {addr[0]} , {addr[1]} connesso a echo server")
+            while True:
+
+                data = await reader.readline()
+                if not data:
+                    break
+                data_json = json.loads(data.decode())
+                if data_json["cmd"] != "echo":
+                    print("Comando errato")
+                    break
+
+                print ("ciao")
+                echo = data_json["text"]
+                diz_risp = {
+                    "status": "ok",
+                    "text": echo
+                }
+                risposta = json.dumps(diz_risp) + "\n"
+                writer.write(risposta.encode())
+                await writer.drain()
+        except KeyboardInterrupt:
+            print("Interruzione da tastiera")
+        except Exception as e:
+            print(f"Errore {e}")
+        finally:
+            if writer:
+                writer.close()
+                await writer.wait_closed()
+            print(f"Connessione Echo Server con client {addr[0]} , {addr[1]} terminata")
 
     async def avvia(self):
-        pass
+        s = await asyncio.start_server(self.server, self.host, self.port)
+        async with s:
+            await s.serve_forever()
 
 
 async def main():
