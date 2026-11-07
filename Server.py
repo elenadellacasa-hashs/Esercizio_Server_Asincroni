@@ -10,7 +10,23 @@ class NameServer:
         self.dizionario = {"time": ("127.0.0.1", 6001), "echo": ("127.0.0.1", 6002)}
 
     async def server(self, reader, writer):
-        pass
+        addr = writer.get_extra_info("peername")
+        print(f"Client {addr[0]} , {addr[1]} connesso a name server")
+        while True:
+            data = await reader.readline()
+            if not data:
+                break
+            richiesta_json = json.loads(data.decode())
+            if richiesta_json["service"] == "time":
+                diz_risposta = {
+                    "status" : "ok",
+                    "service" : "time" ,
+                    "host" : self.dizionario["time"][0],
+                    "port": self.dizionario["time"][1]
+                }
+                risposta_json = json.dumps(diz_risposta) + "\n"
+                writer.write(risposta_json.encode())
+            await writer.drain()
 
     async def avvia(self):
         pass
